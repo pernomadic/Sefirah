@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using NAudio.CoreAudioApi;
-using NAudio.CoreAudioApi.Interfaces;
 using Sefirah.Data.Models;
 using Sefirah.Platforms.Windows.Interop;
 
@@ -9,11 +8,12 @@ namespace Sefirah.Platforms.Windows.Features;
 public class AudioFeature(
     ILogger logger,
     ISessionManager sessionManager,
-    IDeviceManager deviceManager) : IAudioFeature, IMMNotificationClient
+    IDeviceManager deviceManager) : IAudioFeature
 {
     private string? defaultDeviceId;
     private readonly MMDeviceEnumerator enumerator = new();
     private readonly Dictionary<string, DeviceVolumeNotificationHandler> deviceHandlers = [];
+    private MMDeviceNotificationClient? notificationClient;
 
     /// <inheritdoc/>
     public Task InitializeAsync()
@@ -21,7 +21,10 @@ public class AudioFeature(
         try
         {
             InitializeAudioDevices();
-            enumerator.RegisterEndpointNotificationCallback(this);
+            notificationClient = enumerator.CreateNotificationClient();
+            notificationClient.DeviceAdded += (_, e) => OnDeviceAdded(e.DeviceId);
+            notificationClient.DeviceRemoved += (_, e) => OnDeviceRemoved(e.DeviceId);
+            notificationClient.DefaultDeviceChanged += (_, e) => OnDefaultDeviceChanged(e.Flow, e.Role, e.DeviceId);
             sessionManager.ConnectionStatusChanged += OnConnectionStatusChanged;
             logger.Info("Audio devices initialized");
         }
@@ -211,10 +214,6 @@ public class AudioFeature(
         }
     }
 
-    public void OnDeviceStateChanged(string deviceId, DeviceState newState)
-    {
-    }
-
     public void OnDeviceAdded(string pwstrDeviceId)
     {
         try
@@ -285,10 +284,6 @@ public class AudioFeature(
         }
 
         logger.Info($"Default device changed: {newDefaultDeviceId}");
-    }
-
-    public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
-    {
     }
 }
 
