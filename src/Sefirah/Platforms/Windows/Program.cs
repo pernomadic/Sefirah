@@ -97,7 +97,7 @@ internal class Program
         if (string.IsNullOrEmpty(package))
             return;
 
-        Launcher.LaunchUriAsync(new Uri($"sefirah://{package}")).AsTask().GetAwaiter().GetResult();
+        Launcher.LaunchUriAsync(new Uri($"pccontrol://{package}")).AsTask().GetAwaiter().GetResult();
     }
 
     private static string? GetHostedAppPackage(string[] args)

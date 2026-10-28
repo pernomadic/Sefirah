@@ -179,7 +179,7 @@ public partial class App : Application
         await MainWindow.DispatcherQueue.EnqueueAsync(() => InitializeApplicationAsync(activatedEventArgs));
     }
 
-    /// <summary>Parses sefirah://&lt;package&gt; and launches scrcpy for that package.</summary>
+    /// <summary>Parses pccontrol://&lt;package&gt; and launches scrcpy for that package.</summary>
     private static async void HandleProtocolActivationArgs(ProtocolActivatedEventArgs protocolArgs)
     {
         var package = protocolArgs.Uri.Host;
