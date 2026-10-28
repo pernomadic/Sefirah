@@ -86,11 +86,17 @@ internal class Program
 
         try
         {
-            var host = UnoPlatformHostBuilder.Create()
+            var hostBuilder = UnoPlatformHostBuilder.Create()
                 .App(() => new App())
                 .UseX11()
-                .UseLinuxFrameBuffer()
-                .Build();
+                .UseLinuxFrameBuffer();
+
+            if (OperatingSystem.IsWindows())
+            {
+                hostBuilder = hostBuilder.UseWin32();
+            }
+
+            var host = hostBuilder.Build();
 
             host.Run();
         }
